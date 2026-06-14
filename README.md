@@ -6,6 +6,23 @@ Does your AI Agent get dumber as it remembers more? This system helps you manage
 
 Based on [@ohxiyu](https://x.com/ohxiyu)'s P0/P1/P2 priority system.
 
+## v3: Promoted Section Auto-Archival
+
+OpenClaw's Dreaming system auto-promotes short-term memory into `## Promoted From Short-Term Memory (YYYY-MM-DD)` sections in `MEMORY.md`. These accumulate over time and bloat the hot memory file.
+
+The memory-janitor now handles these sections:
+- **TTL**: Promoted content is treated as P2 (30-day TTL from the promotion date)
+- **Auto-archive**: Expired promoted sections (header + content + comments) are moved to `memory/archive/`
+- **Safe**: Only entire sections are archived, never partial blocks
+
+```bash
+# Check promoted section stats
+python3 scripts/memory-janitor.py --stats
+
+# Preview what would be archived
+python3 scripts/memory-janitor.py --dry-run
+```
+
 ## Results
 
 ```
@@ -60,11 +77,24 @@ python3 scripts/memory-janitor.py --stats
 python3 scripts/memory-janitor.py
 ```
 
+## Promoted Section Format
+
+When Dreaming promotes content, it creates sections like:
+
+```markdown
+## Promoted From Short-Term Memory (2026-05-28)
+
+<!-- openclaw-memory-promotion:memory:memory/2026-05-20-0451.md:56:58 -->
+- Some promoted content [score=0.811 recalls=0 avg=0.620 source=memory/2026-05-20-0451.md:56-58]
+```
+
+After 30 days, the entire section (header, comments, content lines) is auto-archived to `memory/archive/auto-YYYY-MM-DD.md`.
+
 ## Files
 
 | File | Description |
 |------|-------------|
-| `scripts/memory-janitor.py` | Auto-archive script, P2>30d/P1>90d → archive |
+| `scripts/memory-janitor.py` | Auto-archive script, P2>30d/P1>90d → archive; v3 handles promoted sections |
 | `templates/MEMORY.md` | Hot memory template with P0/P1/P2 format |
 | `templates/AGENTS-rules.md` | 5 core principles example |
 | `templates/lessons.jsonl` | Structured lesson format |

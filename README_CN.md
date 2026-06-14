@@ -7,6 +7,23 @@ AI Agent 记忆越多反而越蠢？这套系统帮你管理 OpenClaw 记忆，T
 
 基于 [@ohxiyu](https://x.com/ohxiyu) 的 P0/P1/P2 方案落地实现。
 
+## v3：Promoted 分区自动归档
+
+OpenClaw 的 Dreaming 系统会自动将短期记忆晋升到 `MEMORY.md` 的 `## Promoted From Short-Term Memory (YYYY-MM-DD)` 分区。这些内容会随时间累积，导致热记忆文件膨胀。
+
+memory-janitor 现已支持处理这些分区：
+- **TTL**：晋升内容视为 P2（从晋升日起 30 天过期）
+- **自动归档**：过期的晋升分区（标题 + 内容 + 注释）整体移入 `memory/archive/`
+- **安全**：只归档完整分区，不截断部分块
+
+```bash
+# 查看晋升分区统计
+python3 scripts/memory-janitor.py --stats
+
+# 预览归档内容
+python3 scripts/memory-janitor.py --dry-run
+```
+
 ## 效果
 
 ```
@@ -61,11 +78,24 @@ python3 scripts/memory-janitor.py --stats
 python3 scripts/memory-janitor.py
 ```
 
+## 晋升分区格式
+
+Dreaming 晋升内容时会创建如下分区：
+
+```markdown
+## Promoted From Short-Term Memory (2026-05-28)
+
+<!-- openclaw-memory-promotion:memory:memory/2026-05-20-0451.md:56:58 -->
+- 某条晋升内容 [score=0.811 recalls=0 avg=0.620 source=memory/2026-05-20-0451.md:56-58]
+```
+
+30 天后，整个分区（标题、注释、内容行）自动归档到 `memory/archive/auto-YYYY-MM-DD.md`。
+
 ## 文件说明
 
 | 文件 | 说明 |
 |------|------|
-| `scripts/memory-janitor.py` | 自动归档脚本，P2>30天/P1>90天 → archive |
+| `scripts/memory-janitor.py` | 自动归档脚本，P2>30天/P1>90天 → archive；v3 支持晋升分区处理 |
 | `templates/MEMORY.md` | 热记忆模板，带 P0/P1/P2 格式示例 |
 | `templates/AGENTS-rules.md` | 5 条核心原则示例 |
 | `templates/lessons.jsonl` | 结构化教训格式示例 |

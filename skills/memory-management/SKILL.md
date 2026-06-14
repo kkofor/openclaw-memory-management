@@ -78,3 +78,17 @@ If >200 lines:
 2. Add dates to P1/P2 entries missing them
 3. Move detailed content to `lessons/*.jsonl`
 4. Run `--dry-run` then archive
+
+## Promoted Section Auto-Archival (v3)
+
+OpenClaw's Dreaming system promotes short-term memory into `## Promoted From Short-Term Memory (YYYY-MM-DD)` sections. These accumulate and bloat MEMORY.md.
+
+The janitor handles them automatically:
+- Promoted content = P2 (30-day TTL from promotion date)
+- Entire sections archived to `memory/archive/`
+- Safe: never partial blocks
+
+Check promoted section stats:
+```bash
+python3 scripts/memory-janitor.py --stats | grep -i promot
+```
